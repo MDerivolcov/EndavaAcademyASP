@@ -17,6 +17,8 @@ namespace Endava.iAcademy.Domain
 
         public DateTime Date { get; set; }
 
+        public string Category { get; set; }
+
         public List<Lesson> Lessons { get; set; }
     }
 }

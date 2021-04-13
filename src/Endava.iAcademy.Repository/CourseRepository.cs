@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Endava.iAcademy.Domain;
+using Endava.iAcademy.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Endava.iAcademy.Repository
 {
@@ -8,11 +11,87 @@ namespace Endava.iAcademy.Repository
     {
         public CourseRepository()
         {
-
         }
 
+        public List<Course> GetAllCoursesHome(string sortParam, string categoryParam, string searchParam)
+        {
+            if ((sortParam != "") && (sortParam != null))
+                return GetSortCourses(sortParam);
+            else if ((categoryParam != "") && (categoryParam != null))
+                return GetCategoryCourses(categoryParam);
+            else if ((searchParam != "") && (searchParam != null))
+                return GetSearchCourses (searchParam);
+            else
+                return GetAllCourses();
+        }
         public List<Course> GetAllCourses()
         {
+            using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
+            {
+                foreach (var q in dbContext.Courses.ToList())
+                {
+                    q.Lessons = dbContext.Lessons.Where(x => x.CourseId == q.Id).ToList<Lesson>();
+                }
+
+                return dbContext.Courses.ToList();
+            }
+        }
+        public List<Course> GetSortCourses(string sortParam)
+        {
+            switch (sortParam)
+            {
+                case "Title":
+                    return (this.GetAllCourses().OrderBy(u => u.Title)).ToList();
+                case "Rating":
+                    return (this.GetAllCourses().OrderBy(u => u.Rating)).ToList();
+                default:
+                    return (this.GetAllCourses()).ToList();
+            }
+        }
+        public List<Course> GetCategoryCourses(string categoryParam)
+        {
+             List<Domain.Course> list_aux = new List<Domain.Course> { };
+             var selectedCourses = from t in this.GetAllCourses()
+                                   where t.Category.Equals(categoryParam)
+                                   select t;
+
+             foreach (var s in selectedCourses)
+             {
+                 list_aux.Add(s);
+             }
+
+             return list_aux;
+        }
+        public List<Course> GetSearchCourses(string searchParam)
+        {
+            List<Domain.Course> list_aux = new List<Domain.Course> { };
+            if ((searchParam != null) && (searchParam != ""))
+            {
+                var searchCourses = from t in this.GetAllCourses()
+                                    where t.Title.ToUpper().Contains(searchParam.ToUpper())
+                                    select t;
+
+                foreach (var s in searchCourses)
+                {
+                    list_aux.Add(s);
+                }
+            }
+            else
+            {
+                var searchCourses = from t in this.GetAllCourses()
+                                    select t;
+
+                foreach (var s in searchCourses)
+                {
+                    list_aux.Add(s);
+                }
+            }
+
+            return list_aux;
+        }
+        
+            /**********************************************************************/
+            /*
             return new List<Course>
             {
                 new Course
@@ -23,6 +102,7 @@ namespace Endava.iAcademy.Repository
                     Author = "Clint Eastwood",
                     Date = new DateTime(2020,08,01),
                     Rating = (float)8.75,
+                    Category = "Free",
                     Lessons = new List<Lesson>
                     {
                         new Lesson
@@ -65,6 +145,7 @@ namespace Endava.iAcademy.Repository
                     Author = "Adam Marczak",
                     Date = new DateTime(2020,07,07),
                     Rating = (float)9.05,
+                    Category = "Paid",
                     Lessons = new List<Lesson>
                     {
                         new Lesson
@@ -110,6 +191,7 @@ namespace Endava.iAcademy.Repository
                     Author = "Clint Eastwood",
                     Date = new DateTime(2018,04,01),
                     Rating = (float)9.18,
+                    Category = "Free",
                     Lessons = new List<Lesson>
                     {
                         new Lesson
@@ -154,6 +236,7 @@ namespace Endava.iAcademy.Repository
                     Author = "Gareth David",
                     Date = new DateTime(2014,02,10),
                     Rating = (float)8.45,
+                    Category = "Paid",
                     Lessons = new List<Lesson>
                     {
                         new Lesson
@@ -191,10 +274,40 @@ namespace Endava.iAcademy.Repository
                             Link = "https://www.youtube.com/embed/GFY0_EMVYDw"
                         }
                     }
+                },
+                // add new course TEST
+                new Course
+                {
+                    Id = 5,
+                    Title = "TEST TITLE",
+                    Description = "Test description" +
+                    "\ntest test test test test test",
+                    Author = "Mihail D",
+                    Date = new DateTime(2021,03,30),
+                    Rating = (float)9.00,
+                    Category = "Free",
+                    Lessons = new List<Lesson>
+                    {
+                        new Lesson
+                        {
+                            Title = "1. Introduction",
+                            Description = "Introduction into Adobe Illustrator.",
+                            Link = "https://www.youtube.com/embed/IBouhf4seWQ"
+                        },
+                        new Lesson
+                        {
+                            Title = "2. Interface Introduction",
+                            Description = "In this video tutorial I will be using Adobe Illustrator CC for mac." +
+                            "\nAlmost all of the principles demonstrated and covered will apply to future and previous versions." +
+                            "\nSome differences may apply if you are using a previous or future version.",
+                            Link = "https://www.youtube.com/embed/QKWnkIPur2Q"
+                        }
+                    } 
                 }
             };
+            
         }
-
+            */
         public void GetCourseByName()
         {
 

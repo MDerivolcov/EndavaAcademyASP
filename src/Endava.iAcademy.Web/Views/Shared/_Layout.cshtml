@@ -24,11 +24,11 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                    </ul>
-                    <form class="form-inline my-2 my-lg-0">
-                        <input class="form-control mr-sm-2" type="text" placeholder="Search">
-                        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-                    </form>
+                    </ul>   
+                        <form class="form-inline my-2 my-lg-0" method="get" action="/Home/Index">
+                            <input class="form-control mr-sm-2" type="text" placeholder="Search" id="text1" name="searchParam">
+                            <button class="btn btn-secondary my-2 my-sm-0" type="submit" id="s2">Search</button>
+                        </form> 
                 </div>
             </div>
         </nav>

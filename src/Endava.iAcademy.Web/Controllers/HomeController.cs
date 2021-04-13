@@ -1,13 +1,18 @@
 ﻿using System.Diagnostics;
+using System.Linq;
+using System.Collections.Generic;
 using Endava.iAcademy.Repository;
 using Endava.iAcademy.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Endava.iAcademy.Domain;
 
 namespace Endava.iAcademy.Web.Controllers
 {
     public class HomeController : Controller
     {
+        EndavaAcademyDbContext db = new EndavaAcademyDbContext();
+
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -15,12 +20,15 @@ namespace Endava.iAcademy.Web.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
-        {
+        public IActionResult Index(string sortParam, string categoryParam, string searchParam)
+        {   
             var courseRepository = new CourseRepository();
-            var courses = courseRepository.GetAllCourses();
             var coursesViewModel = new CoursesViewModel();
-            coursesViewModel.Courses = courses;
+
+            coursesViewModel.SortParam = sortParam;
+            coursesViewModel.Category = categoryParam;
+
+            coursesViewModel.Courses = courseRepository.GetAllCoursesHome(sortParam, categoryParam, searchParam);
             return View(coursesViewModel);
         }
 
