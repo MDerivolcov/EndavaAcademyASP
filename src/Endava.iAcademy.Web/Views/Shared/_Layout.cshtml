@@ -24,11 +24,25 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                        </li>
                     </ul>   
-                        <form class="form-inline my-2 my-lg-0" method="get" action="/Home/Index">
-                            <input class="form-control mr-sm-2" type="text" placeholder="Search" id="text1" name="searchParam">
-                            <button class="btn btn-secondary my-2 my-sm-0" type="submit" id="s2">Search</button>
-                        </form> 
+                    <form class="form-inline my-2 my-lg-0" method="get" action="/Home/Index">
+                        <input class="form-control mr-sm-2" type="text" placeholder="Search" id="text1" name="searchParam">
+                        <button class="btn btn-secondary my-2 my-sm-0" type="submit" id="s2">Search</button>
+                    </form> 
+                    <form class="form-inline my-2 my-lg-0" method="post" action="/Account/Logout">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <button type="submit" id="auth">Log In</button>
+                        }
+                        else
+                        {
+                            <label>Hello @User.Identity.Name!</label>
+                            <button type="submit" id="auth">Log Out</button>
+                        }
+                    </form>
                 </div>
             </div>
         </nav>

@@ -1,0 +1,21 @@
+﻿@model Endava.iAcademy.Domain.Lesson
+
+@{
+    ViewData["Title"] = "DeleteLesson";
+}
+
+<h1>DeleteLesson</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Lesson</h4>
+    <hr />
+    @using (Html.BeginForm("DeleteLesson", "Admin", FormMethod.Post))
+    {
+        <label asp-for="Id" name="Id" class="control-label"></label>
+        <input asp-for="Id" name="Id" class="form-control" />
+
+        <input type="submit" value="Delete lesson" class="btn btn-danger" />
+        <a asp-action="Index">Back to List</a>
+    }
+</div>

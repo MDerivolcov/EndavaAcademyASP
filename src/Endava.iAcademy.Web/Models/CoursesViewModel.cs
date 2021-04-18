@@ -7,8 +7,6 @@ namespace Endava.iAcademy.Web.Models
     {
         public List<Course> Courses { get; set; }
 
-        public List<Lesson> LessonsM { get; set; }
-
         public List<string> SortAction { get; set; }
 
         public string SortParam { get; set; }

@@ -308,9 +308,5 @@ namespace Endava.iAcademy.Repository
             
         }
             */
-        public void GetCourseByName()
-        {
-
-        }
     }
 }
