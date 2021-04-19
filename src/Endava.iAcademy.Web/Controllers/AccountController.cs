@@ -19,11 +19,6 @@ namespace Endava.iAcademy.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private DataContext db;
-        public AccountController(DataContext context)
-        {
-            db = context;
-        }
         [HttpGet]
         public IActionResult Login()
         {
@@ -38,13 +33,12 @@ namespace Endava.iAcademy.Web.Controllers
                 if (ModelState.IsValid)
                 {
                 User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-                if (user != null)
+    
+                    if (user != null)
                     {
                         await Authenticate(model.Email);
-
-                        if(model.Email == "admin@mail.ru")
+                        if (user.Role == "admin")
                         {
-                            //test add cookie
                             Response.Cookies.Append("myCookie", "admin");
                         }
                         return RedirectToAction("Index", "Home");
@@ -63,26 +57,26 @@ namespace Endava.iAcademy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
             {
-                //using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                //{
-                    User user = await db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                if (ModelState.IsValid)
+                {
+
+                    User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
                     if (user == null)
                     {
-                        // добавляем пользователя в бд
-                        db.Users.Add(new User { Email = model.Email, Password = model.Password });
-                        await db.SaveChangesAsync();
+                        dbContext.Users.Add(new User { Email = model.Email, Password = model.Password, Role = model.Role });
+                        await dbContext.SaveChangesAsync();
 
-                        await Authenticate(model.Email); // аутентификация
+                        await Authenticate(model.Email);
 
                         return RedirectToAction("Index", "Home");
                     }
                     else
-                        ModelState.AddModelError("", "Некорректные логин и(или) пароль");
-                //}
+                        ModelState.AddModelError("", "Incorrect login and (or) password");
+                }
+                return View(model);
             }
-            return View(model);
         }
         private async Task Authenticate(string userName)
         {
@@ -98,21 +92,6 @@ namespace Endava.iAcademy.Web.Controllers
         }
         public async Task<IActionResult> Logout()
         {
-            /*   if (HttpContext.Request.Cookies.Count > 0)
-               {
-                   var siteCookies = HttpContext.Request.Cookies.Where(c => c.Key.Contains(".AspNetCore.") || c.Key.Contains("Microsoft.Authentication"));
-                   foreach (var cookie in siteCookies)
-                   {
-                       Response.Cookies.Delete(cookie.Key);
-                   }
-               }
-
-               await HttpContext.SignOutAsync(
-               CookieAuthenticationDefaults.AuthenticationScheme);
-               //HttpContext.Session.Clear();
-               return RedirectToAction("Login", "Account");
-            */
-
             if (Request.Cookies["myCookie"] != null)
             {
                 Response.Cookies.Delete("myCookie");

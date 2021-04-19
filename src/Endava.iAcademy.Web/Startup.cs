@@ -24,7 +24,7 @@ namespace Endava.iAcademy.Web
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
+            //services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
             services.AddControllersWithViews();
 
             // instal conficuration connection 
