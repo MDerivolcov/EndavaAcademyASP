@@ -60,10 +60,10 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using (EndavaAcademyDbContext db = new EndavaAcademyDbContext())
+                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
                 {
-                    db.Courses.Add(course);
-                    db.SaveChanges();
+                    dbContext.Courses.Add(course);
+                    dbContext.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -152,10 +152,10 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using (EndavaAcademyDbContext db = new EndavaAcademyDbContext())
+                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
                 {
-                    db.Lessons.Add(lesson);
-                    db.SaveChanges();
+                    dbContext.Lessons.Add(lesson);
+                    dbContext.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -183,6 +183,32 @@ namespace Endava.iAcademy.Web.Controllers
                     dbContext.SaveChanges();
                 }
                 return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+        /*******************************/
+        // GET: Admin/UsersAcces
+        public ActionResult UsersAcces()
+        {
+            return View();
+        }
+
+        // POST: Admin/UsersAcces
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public ActionResult UsersAcces(User user)
+        {
+            try
+            {
+                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
+                {
+                    dbContext.Entry(user).State = EntityState.Modified;
+                    dbContext.SaveChanges();
+                }
+                return RedirectToAction("Index");
             }
             catch
             {

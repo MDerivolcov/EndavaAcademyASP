@@ -70,7 +70,7 @@ namespace Endava.iAcademy.Web.Controllers
 
                         await Authenticate(model.Email);
 
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Login", "Account");
                     }
                     else
                         ModelState.AddModelError("", "Incorrect login and (or) password");
