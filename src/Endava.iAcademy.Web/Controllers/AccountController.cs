@@ -19,6 +19,12 @@ namespace Endava.iAcademy.Web.Controllers
 {
     public class AccountController : Controller
     {
+        private EndavaAcademyDbContext dbContext;
+        public AccountController(EndavaAcademyDbContext context)
+        {
+            dbContext = context;
+        }
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -28,25 +34,41 @@ namespace Endava.iAcademy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                Domain.User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
+
+                if (user != null)
                 {
-                User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-    
-                    if (user != null)
+                    ClaimsIdentity identity = null;
+                    bool isAuthenticate = false;
+                    if (user.Role == "admin")
                     {
-                        await Authenticate(model.Email);
-                        if (user.Role == "admin")
+                        identity = new ClaimsIdentity(new[]
                         {
-                            Response.Cookies.Append("myCookie", "admin");
-                        }
+                        new Claim(ClaimTypes.Name, model.Email),
+                        new Claim(ClaimTypes.Role, "Admin")
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+                        isAuthenticate = true;
+                    }
+                    else
+                    {
+                        identity = new ClaimsIdentity(new[]
+                        {
+                        new Claim(ClaimTypes.Name, model.Email),
+                        new Claim(ClaimTypes.Role, "User")
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+                        isAuthenticate = true;
+                    }
+                    if (isAuthenticate)
+                    {
+                        var principal = new ClaimsPrincipal(identity);
+                        var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
                         return RedirectToAction("Index", "Home");
                     }
-                    ModelState.AddModelError("", "Incorrect login and (or) password");
                 }
-                return View(model);
             }
+            return View(model);
         }
         [HttpGet]
         public IActionResult Register()
@@ -57,46 +79,24 @@ namespace Endava.iAcademy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                Domain.User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                if (user == null)
                 {
+                    dbContext.Users.Add(new Domain.User { Email = model.Email, Password = model.Password, Role = "user" });
+                    await dbContext.SaveChangesAsync();
 
-                    User user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-                    if (user == null)
-                    {
-                        dbContext.Users.Add(new User { Email = model.Email, Password = model.Password, Role = model.Role });
-                        await dbContext.SaveChangesAsync();
-
-                        await Authenticate(model.Email);
-
-                        return RedirectToAction("Login", "Account");
-                    }
-                    else
-                        ModelState.AddModelError("", "Incorrect login and (or) password");
+                    return RedirectToAction("Login", "Account");
                 }
-                return View(model);
+                else
+                    ModelState.AddModelError("", "Incorrect login and (or) password");
             }
-        }
-        private async Task Authenticate(string userName)
-        {
-            // create one claim
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
-            };
-            // Create objectClaimsIdentuty
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            // ustanovca autentificationih kuki
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+            return View(model);
         }
         public async Task<IActionResult> Logout()
         {
-            if (Request.Cookies["myCookie"] != null)
-            {
-                Response.Cookies.Delete("myCookie");
-            }
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
     }

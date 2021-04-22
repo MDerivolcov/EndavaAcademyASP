@@ -13,20 +13,21 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Endava.iAcademy.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="Admin,User")]
     public class HomeController : Controller
     {
-
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private EndavaAcademyDbContext dbContext;
+        public HomeController(ILogger<HomeController> logger, EndavaAcademyDbContext context)
         {
             _logger = logger;
+            dbContext = context;
         }
         [AllowAnonymous]
         public IActionResult Index(string sortParam, string categoryParam, string searchParam)
         {   
-            var courseRepository = new CourseRepository();
+            var courseRepository = new CourseRepository(dbContext);
             var coursesViewModel = new CoursesViewModel();
 
             coursesViewModel.SortParam = sortParam;

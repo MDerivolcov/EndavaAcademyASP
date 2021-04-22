@@ -14,8 +14,5 @@ namespace Endava.iAcademy.Web.Models
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Password entered incorrectly")]
         public string ConfirmPassword { get; set; }
-
-        [Required(ErrorMessage = "Role not specified")]
-        public string Role { get; set; }
     }
 }

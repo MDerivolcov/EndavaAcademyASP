@@ -15,36 +15,32 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Endava.iAcademy.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+        private EndavaAcademyDbContext dbContext;
+        public AdminController(EndavaAcademyDbContext context)
+        {
+            dbContext = context;
+        }
+
         // GET: Admin
         public ActionResult Index()
         {
-            using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-            {
-                if(Request.Cookies["myCookie"] == "admin") 
-                {
-                    return View(dbContext.Courses.ToList());
-                }
-                return RedirectToAction("Index","Home");
-            }
+            return View(dbContext.Courses.ToList());
         }
 
         // GET: Admin/Details/5
         public ActionResult Details(int id)
         {
-            using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-            {
-                var c = from i in dbContext.Courses
-                             where i.Id == id
-                             select i;
+            var c = from i in dbContext.Courses
+                    where i.Id == id
+                    select i;
 
-                var course = c.FirstOrDefault(); 
+            var course = c.FirstOrDefault();
 
-                course.Lessons = dbContext.Lessons.Where(x => x.CourseId == id).ToList<Lesson>();
-                return View(course);
-            }
+            course.Lessons = dbContext.Lessons.Where(x => x.CourseId == id).ToList<Lesson>();
+            return View(course);
         }
 
         // GET: Admin/Create
@@ -60,11 +56,8 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    dbContext.Courses.Add(course);
-                    dbContext.SaveChanges();
-                }
+                dbContext.Courses.Add(course);
+                dbContext.SaveChanges();
                 return RedirectToAction("Index");
             }
             catch
@@ -76,18 +69,15 @@ namespace Endava.iAcademy.Web.Controllers
         // GET: Admin/Edit/5
         public ActionResult Edit(int id)
         {
-            using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-            {
-                var c = from i in dbContext.Courses
-                                         where i.Id == id
-                                         select i;
+            var c = from i in dbContext.Courses
+                    where i.Id == id
+                    select i;
 
-                var course = c.FirstOrDefault();
+            var course = c.FirstOrDefault();
 
-                course.Lessons = dbContext.Lessons.Where(x => x.CourseId == id).ToList<Lesson>();
-                
-                return View(course);
-            }
+            course.Lessons = dbContext.Lessons.Where(x => x.CourseId == id).ToList<Lesson>();
+
+            return View(course);
         }
 
         // POST: Admin/Edit/5
@@ -97,11 +87,8 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    dbContext.Entry(course).State = EntityState.Modified;
-                    dbContext.SaveChanges();
-                }
+                dbContext.Entry(course).State = EntityState.Modified;
+                dbContext.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -113,10 +100,7 @@ namespace Endava.iAcademy.Web.Controllers
         // GET: Admin/Delete/5
         public ActionResult Delete(int id)
         {
-            using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-            {
-                return View(dbContext.Courses.Where(x => x.Id == id).FirstOrDefault());
-            }
+            return View(dbContext.Courses.Where(x => x.Id == id).FirstOrDefault());
         }
 
         // POST: Admin/Delete/5
@@ -126,12 +110,9 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    Course course = dbContext.Courses.Where(x => x.Id == id).FirstOrDefault();
-                    dbContext.Courses.Remove(course);
-                    dbContext.SaveChanges();
-                }
+                Course course = dbContext.Courses.Where(x => x.Id == id).FirstOrDefault();
+                dbContext.Courses.Remove(course);
+                dbContext.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -139,6 +120,7 @@ namespace Endava.iAcademy.Web.Controllers
                 return View();
             }
         }
+
         // GET: Admin/CreateLesson
         public ActionResult CreateLesson()
         {
@@ -152,11 +134,8 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    dbContext.Lessons.Add(lesson);
-                    dbContext.SaveChanges();
-                }
+                dbContext.Lessons.Add(lesson);
+                dbContext.SaveChanges();
                 return RedirectToAction("Index");
             }
             catch
@@ -164,6 +143,7 @@ namespace Endava.iAcademy.Web.Controllers
                 return View();
             }
         }
+
         // GET: Admin/Delete/5
         public ActionResult DeleteLesson()
         {
@@ -176,39 +156,10 @@ namespace Endava.iAcademy.Web.Controllers
         {
             try
             {
-                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    Lesson lesson = dbContext.Lessons.Where(x => x.Id == id).FirstOrDefault();
-                    dbContext.Lessons.Remove(lesson);
-                    dbContext.SaveChanges();
-                }
+                Lesson lesson = dbContext.Lessons.Where(x => x.Id == id).FirstOrDefault();
+                dbContext.Lessons.Remove(lesson);
+                dbContext.SaveChanges();
                 return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-        /*******************************/
-        // GET: Admin/UsersAcces
-        public ActionResult UsersAcces()
-        {
-            return View();
-        }
-
-        // POST: Admin/UsersAcces
-        [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public ActionResult UsersAcces(User user)
-        {
-            try
-            {
-                using (EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
-                {
-                    dbContext.Entry(user).State = EntityState.Modified;
-                    dbContext.SaveChanges();
-                }
-                return RedirectToAction("Index");
             }
             catch
             {

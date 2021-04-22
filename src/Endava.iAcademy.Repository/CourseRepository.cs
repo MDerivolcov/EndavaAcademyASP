@@ -9,8 +9,10 @@ namespace Endava.iAcademy.Repository
 {
     public class CourseRepository
     {
-        public CourseRepository()
+        private EndavaAcademyDbContext dbContext;
+        public CourseRepository(EndavaAcademyDbContext context)
         {
+            dbContext = context;
         }
 
         public List<Course> GetAllCoursesHome(string sortParam, string categoryParam, string searchParam)
@@ -26,15 +28,12 @@ namespace Endava.iAcademy.Repository
         }
         public List<Course> GetAllCourses()
         {
-            using(EndavaAcademyDbContext dbContext = new EndavaAcademyDbContext())
+            foreach (var q in dbContext.Courses.ToList())
             {
-                foreach (var q in dbContext.Courses.ToList())
-                {
-                    q.Lessons = dbContext.Lessons.Where(x => x.CourseId == q.Id).ToList<Lesson>();
-                }
-
-                return dbContext.Courses.ToList();
+                q.Lessons = dbContext.Lessons.Where(x => x.CourseId == q.Id).ToList<Lesson>();
             }
+
+            return dbContext.Courses.ToList();
         }
         public List<Course> GetSortCourses(string sortParam)
         {
@@ -274,35 +273,6 @@ namespace Endava.iAcademy.Repository
                             Link = "https://www.youtube.com/embed/GFY0_EMVYDw"
                         }
                     }
-                },
-                // add new course TEST
-                new Course
-                {
-                    Id = 5,
-                    Title = "TEST TITLE",
-                    Description = "Test description" +
-                    "\ntest test test test test test",
-                    Author = "Mihail D",
-                    Date = new DateTime(2021,03,30),
-                    Rating = (float)9.00,
-                    Category = "Free",
-                    Lessons = new List<Lesson>
-                    {
-                        new Lesson
-                        {
-                            Title = "1. Introduction",
-                            Description = "Introduction into Adobe Illustrator.",
-                            Link = "https://www.youtube.com/embed/IBouhf4seWQ"
-                        },
-                        new Lesson
-                        {
-                            Title = "2. Interface Introduction",
-                            Description = "In this video tutorial I will be using Adobe Illustrator CC for mac." +
-                            "\nAlmost all of the principles demonstrated and covered will apply to future and previous versions." +
-                            "\nSome differences may apply if you are using a previous or future version.",
-                            Link = "https://www.youtube.com/embed/QKWnkIPur2Q"
-                        }
-                    } 
                 }
             };
             

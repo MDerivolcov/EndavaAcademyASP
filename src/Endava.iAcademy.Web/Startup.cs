@@ -3,6 +3,7 @@ using Endava.iAcademy.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,17 +25,21 @@ namespace Endava.iAcademy.Web
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            //services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
-            services.AddControllersWithViews();
+            services.AddDbContext<EndavaAcademyDbContext>(options => options.UseSqlServer(connection));
 
-            // instal conficuration connection 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => //CookieAuthenticationOptions
-                {
-                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-                });
-            
-            //???
+            services.AddIdentityCore<IdentityUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<EndavaAcademyDbContext>();
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+
+            services.AddControllersWithViews();
             services.AddAuthorization();
         }
 
@@ -52,6 +57,7 @@ namespace Endava.iAcademy.Web
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+            app.UseCookiePolicy();
 
             app.UseDeveloperExceptionPage();
 

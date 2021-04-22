@@ -56,12 +56,13 @@
     <h5>Lessons for this course:</h5>
     @foreach (var option in Model.Lessons)
     {
-<div class="form-group">
-    <label value="Title: ">@option.Title</label><br>
-    <label value="Description: ">@option.Description</label><br>
-    <label value="Link: ">@option.Link</label>
-    <br>
-</div>
+         <div class="form-group">
+             <label value="Id: ">ID-lesson:@option.Id</label><br>
+             <label value="Title: ">@option.Title</label><br>
+             <label value="Description: ">@option.Description</label><br>
+             <label value="Link: ">@option.Link</label>
+             <br>
+         </div>
     }
 </div>
 <div>
